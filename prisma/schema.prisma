@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  uuid String @id @default(uuid())
+  name String
+
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  uuid       String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  role_uuid  String
+  role       Role     @relation(fields: [role_uuid], references: [uuid])
+  password   String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  quizzes       Quiz[]
+  quiz_attempts QuizAttempt[]
+
+  @@map("users")
+}
+
+model Quiz {
+  uuid        String   @id @default(uuid())
+  title       String
+  slug        String
+  description String   @db.Text
+  created_by  User     @relation(fields: [user_uuid], references: [uuid])
+  user_uuid   String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  questions     Question[]
+  quiz_attempts QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  uuid        String   @id @default(uuid())
+  number      String
+  quiz        Quiz     @relation(fields: [quiz_uuid], references: [uuid])
+  quiz_uuid   String
+  text        String   @db.Text
+  explanation String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  choices Choice[]
+  answers Answer[]
+
+  @@map("questions")
+}
+
+model Choice {
+  uuid          String   @id @default(uuid())
+  question      Question @relation(fields: [question_uuid], references: [uuid])
+  question_uuid String
+  choice_text   String   @db.Text
+  is_correct    Boolean
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
+
+  answers Answer[]
+
+  @@map("choices")
+}
+
+model QuizAttempt {
+  uuid         String   @id @default(uuid())
+  user         User     @relation(fields: [user_uuid], references: [uuid])
+  user_uuid    String
+  quiz         Quiz     @relation(fields: [quiz_uuid], references: [uuid])
+  quiz_uuid    String
+  score        Int
+  started_at   DateTime @default(now())
+  completed_at DateTime @default(now())
+
+  answers Answer[]
+
+  @@map("quiz_attempts")
+}
+
+model Answer {
+  uuid                 String      @id @default(uuid())
+  quiz_attempt         QuizAttempt @relation(fields: [quiz_attempt_uuid], references: [uuid])
+  quiz_attempt_uuid    String
+  question             Question    @relation(fields: [question_uuid], references: [uuid])
+  question_uuid        String
+  selected_choice      Choice      @relation(fields: [selected_choice_uuid], references: [uuid])
+  selected_choice_uuid String
+  is_correct           Boolean
+  created_at           DateTime    @default(now())
+}
