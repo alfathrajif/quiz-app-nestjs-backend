@@ -11,6 +11,7 @@
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
     "prisma:seed:dev": "dotenv -e .env.development.local -- ts-node prisma/seed.ts",
+    "prisma:seed:prod": "dotenv -e .env.production.local -- ts-node prisma/seed.ts",
     "prisma:migrate:dev": "dotenv -e .env.development.local -- prisma migrate dev",
     "prisma:migrate:staging": "dotenv -e .env.staging.local -- prisma migrate dev",
     "prisma:migrate:prod": "dotenv -e .env.production.local -- prisma migrate deploy",

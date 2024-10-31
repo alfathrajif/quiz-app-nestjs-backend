@@ -1,64 +1,62 @@
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  await prisma.$transaction([
-    prisma.answer.deleteMany(),
-    prisma.quizAttempt.deleteMany(),
-    prisma.choice.deleteMany(),
-    prisma.question.deleteMany(),
-    prisma.quiz.deleteMany(),
-    // prisma.user.deleteMany(),
-    // prisma.role.deleteMany(),
-  ]);
-
-  // const adminRole = await prisma.role.create({
-  //   data: {
-  //     name: 'admin',
-  //   },
-  // });
-
-  // const userRole = await prisma.role.create({
-  //   data: {
-  //     name: 'user',
-  //   },
-  // });
-
-  // const passwordHash = await bcrypt.hash('Password123', 10);
-
-  // const adminUser = await prisma.user.create({
-  //   data: {
-  //     name: 'Cassandra Douglas',
-  //     email: 'cassandra@example.com',
-  //     password: passwordHash,
-  //     role_uuid: adminRole.uuid,
-  //   },
-  // });
-
-  // await prisma.user.create({
-  //   data: {
-  //     name: 'Edith Wintheiser',
-  //     email: 'edith@example.com',
-  //     password: passwordHash,
-  //     role_uuid: userRole.uuid,
-  //   },
-  // });
-
-  const adminUser = await prisma.user.findUnique({
-    where: {
-      email: 'cassandra@example.com',
+async function generateRole() {
+  const adminRole = await prisma.role.create({
+    data: {
+      name: 'admin',
     },
   });
 
+  const userRole = await prisma.role.create({
+    data: {
+      name: 'user',
+    },
+  });
+
+  return {
+    adminRole,
+    userRole,
+  };
+}
+
+async function generateUser(role: { uuid: string; name: string }) {
+  const passwordHash = await bcrypt.hash('Password123', 10);
+
+  if (role.name === 'admin') {
+    const adminUser = await prisma.user.create({
+      data: {
+        name: 'Admin User',
+        email: 'admin@example.com',
+        password: passwordHash,
+        role_uuid: role.uuid,
+      },
+    });
+    return adminUser;
+  } else {
+    const customerUser = await prisma.user.create({
+      data: {
+        name: 'Test User',
+        email: 'test@example.com',
+        password: passwordHash,
+        role_uuid: role.uuid,
+      },
+    });
+    return customerUser;
+  }
+}
+
+async function generateQuiz(user_uuid: string) {
   // Create multiple quizzes
   await prisma.quiz.create({
     data: {
       title: 'General Knowledge Quiz',
       slug: slugify('General Knowledge Quiz', { lower: true }),
       description: 'A quiz to test your general knowledge skills.',
-      user_uuid: adminUser.uuid,
+      user_uuid: user_uuid,
       questions: {
         create: [
           {
@@ -97,7 +95,7 @@ async function main() {
       title: 'Science and Nature Quiz',
       slug: slugify('Science and Nature Quiz', { lower: true }),
       description: 'Test your knowledge of science and nature.',
-      user_uuid: adminUser.uuid,
+      user_uuid: user_uuid,
       questions: {
         create: [
           {
@@ -136,7 +134,7 @@ async function main() {
       title: 'History Quiz',
       slug: slugify('History Quiz', { lower: true }),
       description: 'A quiz to test your knowledge of history.',
-      user_uuid: adminUser.uuid,
+      user_uuid: user_uuid,
       questions: {
         create: [
           {
@@ -170,6 +168,31 @@ async function main() {
       },
     },
   });
+}
+
+async function main() {
+  await prisma.$transaction([
+    prisma.answer.deleteMany(),
+    prisma.quizAttempt.deleteMany(),
+    prisma.choice.deleteMany(),
+    prisma.question.deleteMany(),
+    prisma.quiz.deleteMany(),
+    // prisma.user.deleteMany(),
+    // prisma.role.deleteMany(),
+  ]);
+
+  const { adminRole, userRole } = await generateRole();
+
+  await generateUser(adminRole);
+  // await generateUser(userRole);
+
+  // const adminUser = await prisma.user.findUnique({
+  //   where: {
+  //     email: 'admin@example.com',
+  //   },
+  // });
+
+  // await generateQuiz(adminUser.uuid);
 }
 
 main()
