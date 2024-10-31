@@ -68,7 +68,7 @@ model Choice {
   uuid          String   @id @default(uuid())
   question      Question @relation(fields: [question_uuid], references: [uuid])
   question_uuid String
-  choice_text   String   @db.Text
+  text          String   @db.Text
   is_correct    Boolean
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now())

@@ -1,6 +1,6 @@
 import { Answer } from './answer.model';
 import { Choice } from './choice.model';
-import { Question } from './question.model';
+import { CreateQuestion, Question, UpdateQuestion } from './question.model';
 import { UserResponse } from './user.model';
 
 export class Quiz {
@@ -33,4 +33,17 @@ export class QuizAttempt {
 
 export class QuizEvaluation extends QuizAttempt {
   answers: Answer[];
+}
+
+export class CreateQuiz {
+  title: string;
+  description: string;
+  questions: CreateQuestion[];
+}
+
+export class UpdateQuiz {
+  uuid: string;
+  title: string;
+  description: string;
+  questions: UpdateQuestion[];
 }
