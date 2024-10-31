@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 import slugify from 'slugify';
 
 const prisma = new PrismaClient();
@@ -11,44 +10,49 @@ async function main() {
     prisma.choice.deleteMany(),
     prisma.question.deleteMany(),
     prisma.quiz.deleteMany(),
-    prisma.user.deleteMany(),
-    prisma.role.deleteMany(),
+    // prisma.user.deleteMany(),
+    // prisma.role.deleteMany(),
   ]);
 
-  const adminRole = await prisma.role.create({
-    data: {
-      name: 'admin',
-    },
-  });
+  // const adminRole = await prisma.role.create({
+  //   data: {
+  //     name: 'admin',
+  //   },
+  // });
 
-  const userRole = await prisma.role.create({
-    data: {
-      name: 'user',
-    },
-  });
+  // const userRole = await prisma.role.create({
+  //   data: {
+  //     name: 'user',
+  //   },
+  // });
 
-  const passwordHash = await bcrypt.hash('Password123', 10);
+  // const passwordHash = await bcrypt.hash('Password123', 10);
 
-  const adminUser = await prisma.user.create({
-    data: {
-      name: 'Cassandra Douglas',
+  // const adminUser = await prisma.user.create({
+  //   data: {
+  //     name: 'Cassandra Douglas',
+  //     email: 'cassandra@example.com',
+  //     password: passwordHash,
+  //     role_uuid: adminRole.uuid,
+  //   },
+  // });
+
+  // await prisma.user.create({
+  //   data: {
+  //     name: 'Edith Wintheiser',
+  //     email: 'edith@example.com',
+  //     password: passwordHash,
+  //     role_uuid: userRole.uuid,
+  //   },
+  // });
+
+  const adminUser = await prisma.user.findUnique({
+    where: {
       email: 'cassandra@example.com',
-      password: passwordHash,
-      role_uuid: adminRole.uuid,
-    },
-  });
-
-  await prisma.user.create({
-    data: {
-      name: 'Edith Wintheiser',
-      email: 'edith@example.com',
-      password: passwordHash,
-      role_uuid: userRole.uuid,
     },
   });
 
   // Create multiple quizzes
-
   await prisma.quiz.create({
     data: {
       title: 'General Knowledge Quiz',
@@ -62,10 +66,10 @@ async function main() {
             text: 'What is the capital city of Japan?',
             choices: {
               create: [
-                { is_correct: false, choice_text: 'Beijing' },
-                { is_correct: true, choice_text: 'Tokyo' },
-                { is_correct: false, choice_text: 'Seoul' },
-                { is_correct: false, choice_text: 'Bangkok' },
+                { is_correct: false, text: 'Beijing' },
+                { is_correct: true, text: 'Tokyo' },
+                { is_correct: false, text: 'Seoul' },
+                { is_correct: false, text: 'Bangkok' },
               ],
             },
             explanation: 'Tokyo is the capital city of Japan.',
@@ -75,10 +79,10 @@ async function main() {
             text: 'Which planet is known as the Red Planet?',
             choices: {
               create: [
-                { is_correct: false, choice_text: 'Venus' },
-                { is_correct: false, choice_text: 'Jupiter' },
-                { is_correct: true, choice_text: 'Mars' },
-                { is_correct: false, choice_text: 'Saturn' },
+                { is_correct: false, text: 'Venus' },
+                { is_correct: false, text: 'Jupiter' },
+                { is_correct: true, text: 'Mars' },
+                { is_correct: false, text: 'Saturn' },
               ],
             },
             explanation: 'Mars is known as the Red Planet.',
@@ -101,10 +105,10 @@ async function main() {
             text: 'What is the chemical symbol for water?',
             choices: {
               create: [
-                { is_correct: true, choice_text: 'H2O' },
-                { is_correct: false, choice_text: 'O2' },
-                { is_correct: false, choice_text: 'CO2' },
-                { is_correct: false, choice_text: 'H2' },
+                { is_correct: true, text: 'H2O' },
+                { is_correct: false, text: 'O2' },
+                { is_correct: false, text: 'CO2' },
+                { is_correct: false, text: 'H2' },
               ],
             },
             explanation: 'The chemical symbol for water is H2O.',
@@ -114,10 +118,10 @@ async function main() {
             text: 'Which gas do plants absorb from the atmosphere?',
             choices: {
               create: [
-                { is_correct: false, choice_text: 'Oxygen' },
-                { is_correct: false, choice_text: 'Nitrogen' },
-                { is_correct: true, choice_text: 'Carbon Dioxide' },
-                { is_correct: false, choice_text: 'Hydrogen' },
+                { is_correct: false, text: 'Oxygen' },
+                { is_correct: false, text: 'Nitrogen' },
+                { is_correct: true, text: 'Carbon Dioxide' },
+                { is_correct: false, text: 'Hydrogen' },
               ],
             },
             explanation: 'Plants absorb carbon dioxide from the atmosphere.',
@@ -140,10 +144,10 @@ async function main() {
             text: 'Who was the first president of the United States?',
             choices: {
               create: [
-                { is_correct: true, choice_text: 'George Washington' },
-                { is_correct: false, choice_text: 'Thomas Jefferson' },
-                { is_correct: false, choice_text: 'Abraham Lincoln' },
-                { is_correct: false, choice_text: 'John Adams' },
+                { is_correct: true, text: 'George Washington' },
+                { is_correct: false, text: 'Thomas Jefferson' },
+                { is_correct: false, text: 'Abraham Lincoln' },
+                { is_correct: false, text: 'John Adams' },
               ],
             },
             explanation:
@@ -154,10 +158,10 @@ async function main() {
             text: 'In which year did World War II end?',
             choices: {
               create: [
-                { is_correct: false, choice_text: '1942' },
-                { is_correct: true, choice_text: '1945' },
-                { is_correct: false, choice_text: '1939' },
-                { is_correct: false, choice_text: '1950' },
+                { is_correct: false, text: '1942' },
+                { is_correct: true, text: '1945' },
+                { is_correct: false, text: '1939' },
+                { is_correct: false, text: '1950' },
               ],
             },
             explanation: 'World War II ended in 1945.',
