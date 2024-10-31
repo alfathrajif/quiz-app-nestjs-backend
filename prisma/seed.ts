@@ -181,18 +181,18 @@ async function main() {
     // prisma.role.deleteMany(),
   ]);
 
-  const { adminRole, userRole } = await generateRole();
+  // const { adminRole, userRole } = await generateRole();
 
-  await generateUser(adminRole);
+  // await generateUser(adminRole);
   // await generateUser(userRole);
 
-  // const adminUser = await prisma.user.findUnique({
-  //   where: {
-  //     email: 'admin@example.com',
-  //   },
-  // });
+  const adminUser = await prisma.user.findUnique({
+    where: {
+      email: 'cassandra@example.com',
+    },
+  });
 
-  // await generateQuiz(adminUser.uuid);
+  await generateQuiz(adminUser.uuid);
 }
 
 main()
