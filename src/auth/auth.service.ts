@@ -49,6 +49,7 @@ export class AuthService {
         email: user.email,
         password: hashedPassword,
         role: 'user',
+        phone: user.phone,
       });
 
       return {

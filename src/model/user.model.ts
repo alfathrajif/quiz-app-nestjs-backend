@@ -22,6 +22,7 @@ export class CreateUserRequest {
   email: string;
   password: string;
   role: string;
+  phone: string;
 }
 
 export class CreateUserResponse {

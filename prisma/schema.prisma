@@ -20,9 +20,10 @@ model User {
   uuid       String   @id @default(uuid())
   name       String
   email      String   @unique
+  phone      String?
+  password   String
   role_uuid  String
   role       Role     @relation(fields: [role_uuid], references: [uuid])
-  password   String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
