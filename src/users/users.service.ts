@@ -33,6 +33,7 @@ export class UsersService {
         email: data.email,
         name: data.name,
         password: data.password,
+        phone: data.phone,
         role: {
           connect: {
             uuid: role.uuid,

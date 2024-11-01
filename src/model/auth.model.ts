@@ -7,6 +7,7 @@ export class SignupRequest {
   last_name: string;
   email: string;
   password: string;
+  phone: string;
 }
 
 export class SignupResponse {
