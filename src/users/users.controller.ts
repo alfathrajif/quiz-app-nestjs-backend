@@ -10,7 +10,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { TokenPayload } from 'src/model/auth.model';
 import { WebResponse } from 'src/model/web.model';
-import { UserResponse } from 'src/model/user.model';
+import { ProfileResponse } from 'src/model/user.model';
 
 @Controller('users')
 export class UsersController {
@@ -21,7 +21,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async getProfile(
     @CurrentUser() user: TokenPayload,
-  ): Promise<WebResponse<UserResponse>> {
+  ): Promise<WebResponse<ProfileResponse>> {
     const currentUser = await this.usersService.getUser({
       uuid: user.user_uuid,
     });
@@ -34,7 +34,10 @@ export class UsersController {
         uuid: currentUser.uuid,
         name: currentUser.name,
         email: currentUser.email,
+        phone: currentUser.phone,
         role: currentUser.role,
+        subscription: currentUser.subscription,
+        payment_requests: currentUser.payment_requests,
       },
     };
   }

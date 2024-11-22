@@ -27,8 +27,11 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
-  quizzes       Quiz[]
-  quiz_attempts QuizAttempt[]
+  quizzes          Quiz[]
+  quiz_attempts    QuizAttempt[]
+  payment_requests PaymentRequest[]
+  payment_receipts PaymentReceipt[]
+  subscriptions    Subscription[]
 
   @@map("users")
 }
@@ -104,4 +107,74 @@ model Answer {
   selected_choice_uuid String
   is_correct           Boolean
   created_at           DateTime    @default(now())
+}
+
+model SubscriptionPlan {
+  uuid        String   @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  duration    String   @default("monthly") // weekly, monthly, yearly
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  subscriptions    Subscription[]
+  payment_requests PaymentRequest[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  uuid                   String           @id @default(uuid())
+  user                   User             @relation(fields: [user_uuid], references: [uuid])
+  user_uuid              String
+  subscription_plan      SubscriptionPlan @relation(fields: [subscription_plan_uuid], references: [uuid])
+  subscription_plan_uuid String
+  started_date           DateTime         @default(now())
+  end_date               DateTime
+  status                 String // active, expired, cancelled
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @default(now())
+
+  @@map("subscriptions")
+}
+
+model PaymentRequest {
+  uuid                   String           @id @default(uuid())
+  user                   User             @relation(fields: [user_uuid], references: [uuid])
+  user_uuid              String
+  subscription_plan      SubscriptionPlan @relation(fields: [subscription_plan_uuid], references: [uuid])
+  subscription_plan_uuid String
+  amount                 Float
+  request_date           DateTime         @default(now())
+  due_date               DateTime
+  status                 String // pending, paid, failed, cancelled
+  payment_method         String           @default("bank_transfer") // bank_transfer, cash
+  notes                  String?          @db.Text
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @default(now())
+
+  payment_receipts PaymentReceipt?
+
+  @@map("payment_requests")
+}
+
+model PaymentReceipt {
+  uuid                 String         @id @default(uuid())
+  payment_request      PaymentRequest @relation(fields: [payment_request_uuid], references: [uuid])
+  payment_request_uuid String         @unique
+  upload_date          DateTime
+  payment_date         DateTime
+  amount_paid          Int
+  payment_proof_image  String
+  status               String // submitted, approved, rejected,
+  reviewed_by          User?          @relation(fields: [reviewed_by_uuid], references: [uuid])
+  reviewed_by_uuid     String?
+  review_date          DateTime?
+  remarks              String?
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @default(now())
+
+  @@map("payment_receipts")
 }

@@ -33,6 +33,7 @@ async function generateUser(role: { uuid: string; name: string }) {
         email: 'admin@example.com',
         password: passwordHash,
         role_uuid: role.uuid,
+        phone: '123456789',
       },
     });
     return adminUser;
@@ -43,6 +44,7 @@ async function generateUser(role: { uuid: string; name: string }) {
         email: 'test@example.com',
         password: passwordHash,
         role_uuid: role.uuid,
+        phone: '987654321',
       },
     });
     return customerUser;
@@ -170,6 +172,28 @@ async function generateQuiz(user_uuid: string) {
   });
 }
 
+async function generateSubscriptionPlans() {
+  await prisma.subscriptionPlan.create({
+    data: {
+      name: 'premium',
+      description: 'Premium subscription plan',
+      price: 100_000,
+      duration: 'weekly',
+      is_active: true,
+    },
+  });
+
+  await prisma.subscriptionPlan.create({
+    data: {
+      name: 'basic',
+      description: 'Basic subscription plan',
+      price: 0,
+      duration: 'infinity',
+      is_active: true,
+    },
+  });
+}
+
 async function main() {
   await prisma.$transaction([
     prisma.answer.deleteMany(),
@@ -177,22 +201,25 @@ async function main() {
     prisma.choice.deleteMany(),
     prisma.question.deleteMany(),
     prisma.quiz.deleteMany(),
-    // prisma.user.deleteMany(),
-    // prisma.role.deleteMany(),
+    prisma.subscription.deleteMany(),
+    prisma.subscriptionPlan.deleteMany(),
+    prisma.user.deleteMany(),
+    prisma.role.deleteMany(),
   ]);
 
-  // const { adminRole, userRole } = await generateRole();
+  const { adminRole, userRole } = await generateRole();
 
-  // await generateUser(adminRole);
-  // await generateUser(userRole);
+  await generateUser(adminRole);
+  await generateUser(userRole);
 
   const adminUser = await prisma.user.findUnique({
     where: {
-      email: 'cassandra@example.com',
+      email: 'admin@example.com',
     },
   });
 
   await generateQuiz(adminUser.uuid);
+  await generateSubscriptionPlans();
 }
 
 main()

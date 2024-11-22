@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { PrismaService } from './prisma.service';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -52,6 +53,9 @@ const envSchema = z.object({
         };
       },
       inject: [ConfigService],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: 'public',
     }),
   ],
   providers: [PrismaService, { provide: APP_FILTER, useClass: ErrorFilter }],
