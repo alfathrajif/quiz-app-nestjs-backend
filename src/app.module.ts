@@ -10,6 +10,9 @@ import { QuizzesModule } from './quizzes/quizzes.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { UsersModule } from './users/users.module';
 import { VerificationsModule } from './payments/verifications/verifications.module';
+import { LogsModule } from './payments/logs/logs.module';
+import { TryoutsModule } from './tryouts/tryouts.module';
+import { SectionsModule } from './sections/sections.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { VerificationsModule } from './payments/verifications/verifications.modu
     RequestsModule,
     ReceiptsModule,
     VerificationsModule,
+    LogsModule,
+    TryoutsModule,
+    SectionsModule,
   ],
   controllers: [],
   providers: [],

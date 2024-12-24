@@ -14,7 +14,7 @@ export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly plansService: PlansService,
-    private readonly subcriptionsService: SubscriptionsService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
   async getUser(filter: Prisma.UserWhereUniqueInput): Promise<User | null> {
@@ -54,10 +54,12 @@ export class UsersService {
               notes: true,
             },
           },
+          payment_logs: true,
         },
       });
+
       if (!user) {
-        console.error('User not found');
+        console.warn('User not found');
         return null;
       }
 
@@ -68,7 +70,7 @@ export class UsersService {
           throw new NotFoundException('Basic plan not found');
         }
 
-        await this.subcriptionsService.create({
+        await this.subscriptionsService.create({
           user_uuid: user.uuid,
           subscription_plan_uuid: basicPlan.uuid,
           end_date: new Date(
@@ -88,7 +90,10 @@ export class UsersService {
           subscription.end_date < new Date()
         ) {
           try {
-            await this.subcriptionsService.update(subscription.uuid, 'expired');
+            await this.subscriptionsService.update(
+              subscription.uuid,
+              'expired',
+            );
           } catch (error) {
             console.error(
               `Error updating subscription: ${subscription.uuid}`,
@@ -139,8 +144,8 @@ export class UsersService {
 
     const user = await this.prismaService.user.create({
       data: {
-        email: data.email,
         name: data.name,
+        email: data.email,
         password: data.password,
         phone: data.phone,
         role: {

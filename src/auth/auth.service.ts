@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { UserResponse } from 'src/model/user.model';
+import { User, UserResponse } from 'src/model/user.model';
 import ms from 'ms';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -13,6 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { PlansService } from 'src/subscriptions/plans/plans.service';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
+import { Subscription } from 'src/model/subscription.model';
+import { LogsService } from 'src/payments/logs/logs.service';
 
 @Injectable()
 export class AuthService {
@@ -20,8 +22,9 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
     private readonly plansService: PlansService,
-    private readonly subcriptionsService: SubscriptionsService,
+    private readonly subscriptionsService: SubscriptionsService,
     private readonly jwtService: JwtService,
+    private readonly paymentLogsService: LogsService,
   ) {}
 
   async login(user: UserResponse, response: Response): Promise<UserResponse> {
@@ -39,43 +42,37 @@ export class AuthService {
 
   async signup(user: SignupRequest): Promise<SignupResponse> {
     try {
-      const name = `${user.first_name} ${user.last_name}`;
-      const hashedPassword = await bcrypt.hash(user.password, 10);
-      const newUser = await this.usersService.createUser({
-        name,
-        email: user.email,
-        password: hashedPassword,
-        role: 'user',
-        phone: user.phone,
-      });
-
-      const plan = await this.plansService.findOne('basic');
-      await this.subcriptionsService.create({
-        user_uuid: newUser.uuid,
-        subscription_plan_uuid: plan.uuid,
-        end_date: new Date(new Date().setDate(new Date().getDate() + 100_000)),
-        started_date: new Date(),
-        status: 'active',
-      });
+      const hashedPassword = await this.hashPassword(user.password);
+      const newUser = await this.createUser(user, hashedPassword);
+      await this.createSubscription(newUser.uuid);
 
       return {
         uuid: newUser.uuid,
         name: newUser.name,
         email: newUser.email,
       };
-    } catch (err) {
-      console.log(err);
-      throw new HttpException('Something when wrong!', 500);
+    } catch (error) {
+      console.error('Error during signup:', error);
+      throw new HttpException(
+        'An error occurred during signup. Please try again.',
+        500,
+      );
     }
   }
 
-  async verifyUser(email: string, password: string): Promise<UserResponse> {
+  async verifyUser(
+    email: string,
+    password: string,
+  ): Promise<UserResponse | null> {
     try {
-      const user = await this.usersService.getUser({ email });
+      const user = await this.findUserByEmail(email);
       if (!user) return null;
 
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return null;
+      const isPasswordValid = await this.validatePassword(
+        password,
+        user.password,
+      );
+      if (!isPasswordValid) return null;
 
       return {
         uuid: user.uuid,
@@ -89,7 +86,7 @@ export class AuthService {
     }
   }
 
-  // Utilities function <--------------------------------------------
+  // Utilities function for login <--------------------------------------------
 
   private getTokenExpiration(): Date {
     const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION');
@@ -132,5 +129,93 @@ export class AuthService {
       httpOnly: true,
       expires: this.getTokenExpiration(),
     });
+  }
+
+  // Utilities function for signup <--------------------------------------------
+
+  private async hashPassword(password: string): Promise<string> {
+    if (!password) {
+      throw new Error('Password is required.');
+    }
+    try {
+      return await bcrypt.hash(password, 10);
+    } catch {
+      throw new Error('Failed to hash password.');
+    }
+  }
+
+  private async createUser(user: SignupRequest, hashedPassword: string) {
+    try {
+      const name = `${user.first_name} ${user.last_name}`;
+      return await this.usersService.createUser({
+        name,
+        email: user.email,
+        password: hashedPassword,
+        role: 'user',
+        phone: user.phone,
+      });
+    } catch {
+      throw new Error('Failed to create user.');
+    }
+  }
+
+  private async createSubscription(userUuid: string): Promise<Subscription> {
+    try {
+      const plan = await this.plansService.findOne('basic');
+      if (!plan) {
+        throw new Error('Subscription plan not found.');
+      }
+
+      const newSubscription: Subscription =
+        await this.subscriptionsService.create({
+          user_uuid: userUuid,
+          subscription_plan_uuid: plan.uuid,
+          end_date: new Date(
+            new Date().setDate(new Date().getDate() + 100_000),
+          ),
+          started_date: new Date(),
+          status: 'active',
+        });
+
+      return newSubscription;
+    } catch {
+      throw new Error('Failed to create subscription.');
+    }
+  }
+
+  // Utilities function for verifyUser <--------------------------------------------
+
+  private async findUserByEmail(email: string): Promise<User> {
+    if (!email) {
+      throw new Error('Email is required.');
+    }
+
+    try {
+      const user = await this.usersService.getUser({ email });
+
+      if (!user) {
+        console.warn(`User with email ${email} not found.`);
+        return null;
+      }
+
+      return user;
+    } catch {
+      throw new Error('Failed to retrieve user by email.');
+    }
+  }
+
+  private async validatePassword(
+    inputPassword: string,
+    storedPassword: string,
+  ): Promise<boolean> {
+    if (!inputPassword || !storedPassword) {
+      throw new Error('Password is required.');
+    }
+
+    try {
+      return await bcrypt.compare(inputPassword, storedPassword);
+    } catch {
+      throw new Error('Failed to validate password.');
+    }
   }
 }

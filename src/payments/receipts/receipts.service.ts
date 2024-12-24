@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Response } from 'express';
+import { join } from 'path';
 import { PrismaService } from 'src/common/prisma.service';
 import { CreatePaymentReceipt, PaymentReceipt } from 'src/model/payment.model';
 
@@ -71,5 +73,11 @@ export class ReceiptsService {
     });
 
     return updatedReceipt;
+  }
+
+  getReceiptImageByFilename(filename: string, res: Response) {
+    const filePath = join(process.cwd(), 'public/images/receipts', filename);
+
+    return res.sendFile(filePath);
   }
 }

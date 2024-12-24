@@ -32,19 +32,59 @@ model User {
   payment_requests PaymentRequest[]
   payment_receipts PaymentReceipt[]
   subscriptions    Subscription[]
+  payment_logs     PaymentLog[]
+  sections         Section[]
+  tryouts          Tryout[]
 
   @@map("users")
 }
 
-model Quiz {
-  uuid        String   @id @default(uuid())
+model Tryout {
+  uuid        String    @id @default(uuid())
   title       String
   slug        String
-  description String   @db.Text
-  created_by  User     @relation(fields: [user_uuid], references: [uuid])
+  description String    @db.Text
+  created_by  User      @relation(fields: [user_uuid], references: [uuid])
   user_uuid   String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  sections Section[]
+
+  @@map("tryouts")
+}
+
+model Section {
+  uuid        String    @id @default(uuid())
+  name        String
+  slug        String?
+  description String
+  tryout      Tryout    @relation(fields: [tryout_uuid], references: [uuid])
+  tryout_uuid String
+  created_by  User      @relation(fields: [user_uuid], references: [uuid])
+  user_uuid   String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  quizzes Quiz[]
+
+  @@map("sections")
+}
+
+model Quiz {
+  uuid         String    @id @default(uuid())
+  title        String
+  slug         String
+  description  String    @db.Text
+  section      Section?  @relation(fields: [section_uuid], references: [uuid])
+  section_uuid String?
+  created_by   User      @relation(fields: [user_uuid], references: [uuid])
+  user_uuid    String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @default(now())
+  deleted_at   DateTime?
 
   questions     Question[]
   quiz_attempts QuizAttempt[]
@@ -55,9 +95,9 @@ model Quiz {
 model Question {
   uuid        String   @id @default(uuid())
   number      String
+  text        String   @db.Text
   quiz        Quiz     @relation(fields: [quiz_uuid], references: [uuid])
   quiz_uuid   String
-  text        String   @db.Text
   explanation String?  @db.Text
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now())
@@ -137,6 +177,8 @@ model Subscription {
   created_at             DateTime         @default(now())
   updated_at             DateTime         @default(now())
 
+  payment_logs PaymentLog[]
+
   @@map("subscriptions")
 }
 
@@ -177,4 +219,18 @@ model PaymentReceipt {
   updated_at           DateTime       @default(now())
 
   @@map("payment_receipts")
+}
+
+model PaymentLog {
+  uuid              String        @id @default(uuid())
+  user              User          @relation(fields: [user_uuid], references: [uuid])
+  user_uuid         String
+  amount            Float
+  payment_date      DateTime      @default(now())
+  subscription      Subscription? @relation(fields: [subscription_uuid], references: [uuid])
+  subscription_uuid String?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @default(now())
+
+  @@map("payment_logs")
 }

@@ -7,8 +7,13 @@ import { CreateQuiz, UpdateQuiz } from 'src/model/quiz.model';
 export class QuizzesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findAll() {
+  async findAll(sectionSlug: string) {
     const quizzes = await this.prismaService.quiz.findMany({
+      where: {
+        section: {
+          slug: sectionSlug,
+        },
+      },
       include: {
         created_by: {
           select: {
@@ -51,6 +56,7 @@ export class QuizzesService {
     const quiz = await this.prismaService.quiz.findFirst({
       where: {
         slug: slug,
+        deleted_at: null,
       },
       include: {
         created_by: {
@@ -77,6 +83,10 @@ export class QuizzesService {
       },
     });
 
+    if (!quiz) {
+      return null;
+    }
+
     const questionsCount = quiz._count.questions;
     const createdBy = {
       user: quiz.created_by,
@@ -97,12 +107,19 @@ export class QuizzesService {
   }
 
   async create(userUuid: string, quiz: CreateQuiz) {
+    const section = await this.prismaService.section.findFirst({
+      where: {
+        slug: quiz.section_slug,
+      },
+    });
+
     const newQuiz = await this.prismaService.quiz.create({
       data: {
         title: quiz.title,
         slug: slugify(quiz.title, { lower: true }),
         description: quiz.description,
         user_uuid: userUuid,
+        section_uuid: section.uuid,
         questions: {
           create: quiz.questions.map((question, index) => {
             return {
@@ -126,9 +143,9 @@ export class QuizzesService {
     return newQuiz;
   }
 
-  async update(slug: string, quiz: UpdateQuiz) {
+  async update(uuid: string, quiz: UpdateQuiz) {
     const updatedQuiz = await this.prismaService.quiz.update({
-      where: { uuid: quiz.uuid },
+      where: { uuid },
       data: {
         title: quiz.title,
         description: quiz.description,
@@ -187,7 +204,7 @@ export class QuizzesService {
 
     const quizQuestions = await this.prismaService.quiz.findFirst({
       where: {
-        slug: slug,
+        uuid,
       },
       include: {
         created_by: {
@@ -215,5 +232,16 @@ export class QuizzesService {
     });
 
     return quizQuestions;
+  }
+
+  async softDelete(uuid: string) {
+    await this.prismaService.quiz.update({
+      where: {
+        uuid,
+      },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
   }
 }

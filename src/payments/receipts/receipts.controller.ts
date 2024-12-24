@@ -10,6 +10,7 @@ import {
   ParseFilePipe,
   Patch,
   Post,
+  Response,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -25,6 +26,8 @@ import { RequestsService } from '../requests/requests.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { PlansService } from 'src/subscriptions/plans/plans.service';
+import { Subscription } from 'src/model/subscription.model';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Controller('payment-receipts')
 export class ReceiptsController {
@@ -33,6 +36,7 @@ export class ReceiptsController {
     private readonly requestsService: RequestsService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly plansService: PlansService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   @Post()
@@ -93,6 +97,11 @@ export class ReceiptsController {
     };
   }
 
+  @Get('images/:filename')
+  getReceiptImage(@Param('filename') filename: string, @Response() res) {
+    return this.receiptsService.getReceiptImageByFilename(filename, res);
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
@@ -126,12 +135,22 @@ export class ReceiptsController {
     if (updatedReceipt.status === 'approved') {
       const premiumPlan = await this.plansService.findOne('premium');
 
-      await this.subscriptionsService.create({
-        user_uuid: updatedReceipt.payment_request.user_uuid,
-        subscription_plan_uuid: premiumPlan.uuid,
-        started_date: new Date(),
-        end_date: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        status: 'active',
+      const newSubscription: Subscription =
+        await this.subscriptionsService.create({
+          user_uuid: updatedReceipt.payment_request.user_uuid,
+          subscription_plan_uuid: premiumPlan.uuid,
+          started_date: new Date(),
+          end_date: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          status: 'active',
+        });
+
+      await this.prismaService.paymentLog.create({
+        data: {
+          user_uuid: updatedReceipt.payment_request.user_uuid,
+          amount: newSubscription.subscription_plan.price,
+          payment_date: new Date(),
+          subscription_uuid: newSubscription.uuid,
+        },
       });
     }
 

@@ -5,8 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { QuizzesService } from './quizzes.service';
@@ -22,8 +24,10 @@ export class QuizzesController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getQuizzes(): Promise<WebResponse<Quiz[]>> {
-    const quizzes = await this.quizzesService.findAll();
+  async getQuizzes(
+    @Query('section_slug') sectionSlug: string,
+  ): Promise<WebResponse<Quiz[]>> {
+    const quizzes = await this.quizzesService.findAll(sectionSlug);
 
     return {
       message: 'Get Quizzes Succeed',
@@ -64,17 +68,33 @@ export class QuizzesController {
     };
   }
 
-  @Put('/:slug')
+  @Patch('/:uuid')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async updateQuiz(@Param('slug') slug: string, @Body() quiz: UpdateQuiz) {
-    const updatedQuiz = await this.quizzesService.update(slug, quiz);
+  async updateQuiz(@Param('uuid') uuid: string, @Body() quiz: UpdateQuiz) {
+    const updatedQuiz = await this.quizzesService.update(uuid, quiz);
 
     return {
       message: 'Update Quiz Succeed',
       success: true,
       status_code: HttpStatus.OK,
       data: updatedQuiz,
+    };
+  }
+
+  @Put('/:uuid')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async softDeleteQuiz(
+    @Param('uuid') uuid: string,
+  ): Promise<WebResponse<null>> {
+    await this.quizzesService.softDelete(uuid);
+
+    return {
+      message: 'Soft Delete Quiz Succeed',
+      success: true,
+      status_code: HttpStatus.OK,
+      data: null,
     };
   }
 }

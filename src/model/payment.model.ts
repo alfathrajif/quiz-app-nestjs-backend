@@ -56,3 +56,20 @@ export class PaymentVerification extends PaymentReceipt {
   status: string; // approved, rejected
   remarks?: string;
 }
+
+export class CreatePaymentLog {
+  user_uuid: string;
+  amount: number;
+  payment_date: Date;
+  subscription_uuid?: string;
+}
+
+export class PaymentLog {
+  uuid: string;
+  user_uuid: string;
+  amount: number;
+  payment_date: Date;
+  subscription_uuid?: string;
+  created_at: Date;
+  updated_at: Date;
+}

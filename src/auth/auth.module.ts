@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PlansModule } from 'src/subscriptions/plans/plans.module';
 import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
+import { LogsModule } from 'src/payments/logs/logs.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
     SubscriptionsModule,
     UsersModule,
     ConfigModule,
+    LogsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
