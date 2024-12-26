@@ -102,6 +102,7 @@ export class TryoutsService {
         title: tryout.title,
         slug: slugify(tryout.title, { lower: true }),
         description: tryout.description,
+        updated_at: new Date(),
       },
       include: {
         created_by: {

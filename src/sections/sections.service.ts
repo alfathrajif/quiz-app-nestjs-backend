@@ -73,6 +73,7 @@ export class SectionsService {
         name: section.name,
         slug: slugify(section.name, { lower: true }),
         description: section.description,
+        updated_at: new Date(),
       },
     });
     return updatedSection;
