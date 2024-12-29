@@ -39,6 +39,7 @@ export class CreateQuiz {
   title: string;
   description: string;
   questions: CreateQuestion[];
+  section_slug: string;
 }
 
 export class UpdateQuiz {

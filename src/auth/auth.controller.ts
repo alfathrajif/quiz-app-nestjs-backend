@@ -29,7 +29,7 @@ export class AuthController {
     const result = await this.authService.login(user, response);
 
     return {
-      message: 'Login Succeed',
+      message: 'Login succeeded',
       success: true,
       status_code: HttpStatus.OK,
       data: {
@@ -49,7 +49,7 @@ export class AuthController {
     const result = await this.authService.signup(user);
 
     return {
-      message: 'Signup Succeed',
+      message: 'Signup succeeded',
       success: true,
       status_code: HttpStatus.CREATED,
       data: result,

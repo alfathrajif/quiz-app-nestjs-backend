@@ -18,7 +18,8 @@ export class ErrorFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         status_code: exception.getStatus(),
       });
-    } else if (exception instanceof NotFoundException) {
+    }
+    if (exception instanceof NotFoundException) {
       response.status(exception.getStatus()).json({
         message: 'Not Found',
         error: exception.message,
