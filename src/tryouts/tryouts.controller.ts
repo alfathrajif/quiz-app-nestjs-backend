@@ -14,8 +14,8 @@ import { TryoutsService } from './tryouts.service';
 import { CreateTryout, Tryout } from 'src/model/tryout.model';
 import { WebResponse } from 'src/model/web.model';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { TokenPayload } from 'src/model/auth.model';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('tryouts')
 export class TryoutsController {
@@ -51,10 +51,10 @@ export class TryoutsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async createTryout(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() tryout: CreateTryout,
   ): Promise<WebResponse<Tryout>> {
-    const newTryout = await this.tryoutsService.create(user.user_uuid, tryout);
+    const newTryout = await this.tryoutsService.create(user.uuid, tryout);
 
     return {
       message: 'Tryout created',

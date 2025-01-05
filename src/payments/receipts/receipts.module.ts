@@ -3,10 +3,10 @@ import { ReceiptsService } from './receipts.service';
 import { ReceiptsController } from './receipts.controller';
 import { RequestsModule } from '../requests/requests.module';
 import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
-import { PlansModule } from 'src/subscriptions/plans/plans.module';
+import { SubscriptionPlansUserModule } from 'src/subscription-plans/user/subscription-plans-user.module';
 
 @Module({
-  imports: [RequestsModule, SubscriptionsModule, PlansModule],
+  imports: [RequestsModule, SubscriptionsModule, SubscriptionPlansUserModule],
   controllers: [ReceiptsController],
   providers: [ReceiptsService],
 })

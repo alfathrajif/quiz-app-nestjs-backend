@@ -6,13 +6,13 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { PlansModule } from 'src/subscriptions/plans/plans.module';
+import { SubscriptionPlansUserModule } from 'src/subscription-plans/user/subscription-plans-user.module';
 import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
 import { LogsModule } from 'src/payments/logs/logs.module';
 
 @Module({
   imports: [
-    PlansModule,
+    SubscriptionPlansUserModule,
     SubscriptionsModule,
     UsersModule,
     ConfigModule,

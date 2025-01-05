@@ -16,8 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ReceiptsService } from './receipts.service';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { TokenPayload } from 'src/model/auth.model';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { CreatePaymentReceipt, PaymentReceipt } from 'src/model/payment.model';
 import { WebResponse } from 'src/model/web.model';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,9 +24,10 @@ import multer from 'multer';
 import { RequestsService } from '../requests/requests.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
-import { PlansService } from 'src/subscriptions/plans/plans.service';
+import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscription-plans-user.service';
 import { Subscription } from 'src/model/subscription.model';
 import { PrismaService } from 'src/common/prisma.service';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('payment-receipts')
 export class ReceiptsController {
@@ -35,7 +35,7 @@ export class ReceiptsController {
     private readonly receiptsService: ReceiptsService,
     private readonly requestsService: RequestsService,
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly plansService: PlansService,
+    private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,
     private readonly prismaService: PrismaService,
   ) {}
 
@@ -43,11 +43,11 @@ export class ReceiptsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async create(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() createReceipt: CreatePaymentReceipt,
   ): Promise<WebResponse<PaymentReceipt>> {
     await this.requestsService.update(
-      user.user_uuid,
+      user.uuid,
       createReceipt.payment_request_uuid,
       {
         status: 'paid',
@@ -106,9 +106,9 @@ export class ReceiptsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async getPaymentReceipts(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
   ): Promise<WebResponse<PaymentReceipt[]>> {
-    const paymentReceipts = await this.receiptsService.findAll(user.user_uuid);
+    const paymentReceipts = await this.receiptsService.findAll(user.uuid);
 
     return {
       message: 'Payment receipts fetched',
@@ -122,25 +122,33 @@ export class ReceiptsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async update(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Param('uuid') uuid: string,
     @Body() updateReceipt: { status: string; remarks?: string },
   ): Promise<WebResponse<PaymentReceipt>> {
     const updatedReceipt = await this.receiptsService.update(
-      user.user_uuid,
+      user.uuid,
       uuid,
       updateReceipt,
     );
 
     if (updatedReceipt.status === 'approved') {
-      const premiumPlan = await this.plansService.findOne('premium');
+      const premiumPlan =
+        await this.SubscriptionPlansUserService.findOne('premium');
+
+      let period: Date;
+      if (premiumPlan.duration === 'monthly') {
+        period = new Date(new Date().setMonth(new Date().getMonth() + 1));
+      } else if (premiumPlan.duration === 'weekly') {
+        period = new Date(new Date().setDate(new Date().getDate() + 7));
+      }
 
       const newSubscription: Subscription =
         await this.subscriptionsService.create({
           user_uuid: updatedReceipt.payment_request.user_uuid,
           subscription_plan_uuid: premiumPlan.uuid,
           started_date: new Date(),
-          end_date: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          end_date: period,
           status: 'active',
         });
 

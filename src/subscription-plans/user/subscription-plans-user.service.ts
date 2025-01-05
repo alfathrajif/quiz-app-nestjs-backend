@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
-export class PlansService {
+export class SubscriptionPlansUserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async findAll() {
     try {
-      const plans = await this.prismaService.subscriptionPlan.findMany();
+      const plans = await this.prismaService.subscriptionPlan.findMany({
+        where: {
+          deleted_at: null,
+        },
+      });
 
       return plans;
     } catch (error) {

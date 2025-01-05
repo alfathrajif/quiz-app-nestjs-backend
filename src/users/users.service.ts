@@ -6,14 +6,14 @@ import {
   CreateUserResponse,
   User,
 } from 'src/model/user.model';
-import { PlansService } from 'src/subscriptions/plans/plans.service';
+import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscription-plans-user.service';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly plansService: PlansService,
+    private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,
     private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
@@ -65,7 +65,8 @@ export class UsersService {
 
       // If user has no subscription, create a basic subscription
       if (!user.subscriptions.length || user.subscriptions.length === 0) {
-        const basicPlan = await this.plansService.findOne('basic');
+        const basicPlan =
+          await this.SubscriptionPlansUserService.findOne('basic');
         if (!basicPlan) {
           throw new NotFoundException('Basic plan not found');
         }

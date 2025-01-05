@@ -11,7 +11,7 @@ import {
 } from 'src/model/auth.model';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { PlansService } from 'src/subscriptions/plans/plans.service';
+import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscription-plans-user.service';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { Subscription } from 'src/model/subscription.model';
 import { LogsService } from 'src/payments/logs/logs.service';
@@ -21,7 +21,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
-    private readonly plansService: PlansService,
+    private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly jwtService: JwtService,
     private readonly paymentLogsService: LogsService,
@@ -161,7 +161,7 @@ export class AuthService {
 
   private async createSubscription(userUuid: string): Promise<Subscription> {
     try {
-      const plan = await this.plansService.findOne('basic');
+      const plan = await this.SubscriptionPlansUserService.findOne('basic');
       if (!plan) {
         throw new Error('Subscription plan not found.');
       }
