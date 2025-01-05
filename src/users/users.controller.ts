@@ -7,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { TokenPayload } from 'src/model/auth.model';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { WebResponse } from 'src/model/web.model';
-import { ProfileResponse } from 'src/model/user.model';
+import { ProfileResponse, UserResponse } from 'src/model/user.model';
 
 @Controller('users')
 export class UsersController {
@@ -20,10 +19,10 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async getProfile(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
   ): Promise<WebResponse<ProfileResponse>> {
     const currentUser = await this.usersService.getUser({
-      uuid: user.user_uuid,
+      uuid: user.uuid,
     });
 
     return {

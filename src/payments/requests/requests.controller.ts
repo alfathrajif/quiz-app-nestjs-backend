@@ -9,9 +9,8 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { TokenPayload } from 'src/model/auth.model';
 import {
   CreatePaymentRequest,
   PaymentRequest,
@@ -19,6 +18,7 @@ import {
 } from 'src/model/payment.model';
 import { WebResponse } from 'src/model/web.model';
 import { RequestsService } from './requests.service';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('payment-requests')
 export class RequestsController {
@@ -27,9 +27,9 @@ export class RequestsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getPaymentRequests(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
   ): Promise<WebResponse<PaymentRequest[]>> {
-    const paymentRequests = await this.requestsService.findAll(user.user_uuid);
+    const paymentRequests = await this.requestsService.findAll(user.uuid);
 
     return {
       message: 'Payment requests retrieved',
@@ -43,11 +43,11 @@ export class RequestsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async create(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() createRequest: CreatePaymentRequest,
   ): Promise<WebResponse<PaymentRequest>> {
     const paymentRequest = await this.requestsService.create(
-      user.user_uuid,
+      user.uuid,
       createRequest,
     );
 
@@ -63,12 +63,12 @@ export class RequestsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async updateRequest(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Param('uuid') uuid: string,
     @Body() request: UpdatePaymentRequest,
   ): Promise<WebResponse<PaymentRequest>> {
     const paymentRequest = await this.requestsService.update(
-      user.user_uuid,
+      user.uuid,
       uuid,
       request,
     );

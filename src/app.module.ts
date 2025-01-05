@@ -13,6 +13,8 @@ import { VerificationsModule } from './payments/verifications/verifications.modu
 import { LogsModule } from './payments/logs/logs.module';
 import { TryoutsModule } from './tryouts/tryouts.module';
 import { SectionsModule } from './sections/sections.module';
+import { SubscriptionPlansAdminModule } from './subscription-plans/admin/subscription-plans-admin.module';
+import { SubscriptionPlansUserModule } from './subscription-plans/user/subscription-plans-user.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { SectionsModule } from './sections/sections.module';
     LogsModule,
     TryoutsModule,
     SectionsModule,
+    SubscriptionPlansAdminModule,
+    SubscriptionPlansUserModule,
   ],
   controllers: [],
   providers: [],

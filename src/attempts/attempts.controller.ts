@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { AttemptsService } from './attempts.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { TokenPayload } from 'src/model/auth.model';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { QuizAttemptPayload, QuizEvaluation } from 'src/model/quiz.model';
 import { WebResponse } from 'src/model/web.model';
 import { AnswersService } from 'src/answers/answers.service';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('quiz-attempts')
 export class AttemptsController {
@@ -27,13 +27,13 @@ export class AttemptsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() body: QuizAttemptPayload,
   ): Promise<WebResponse<QuizEvaluation>> {
-    const newAttempt = await this.attemptsService.create(user.user_uuid, body);
+    const newAttempt = await this.attemptsService.create(user.uuid, body);
     await this.answersService.create(newAttempt.uuid, body.selected_choices);
     const currentAttempt = await this.attemptsService.findOne(
-      user.user_uuid,
+      user.uuid,
       newAttempt.uuid,
     );
 
@@ -49,10 +49,10 @@ export class AttemptsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async getAttempt(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Param('uuid') uuid: string,
   ): Promise<WebResponse<QuizEvaluation>> {
-    const attempt = await this.attemptsService.findOne(user.user_uuid, uuid);
+    const attempt = await this.attemptsService.findOne(user.uuid, uuid);
 
     return {
       message: 'Get Evaluation Succeed',

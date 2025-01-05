@@ -150,14 +150,15 @@ model Answer {
 }
 
 model SubscriptionPlan {
-  uuid        String   @id @default(uuid())
+  uuid        String    @id @default(uuid())
   name        String
   description String
   price       Float
-  duration    String   @default("monthly") // weekly, monthly, yearly
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
+  duration    String    @default("monthly") // weekly, monthly, infinite
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  deleted_at  DateTime?
 
   subscriptions    Subscription[]
   payment_requests PaymentRequest[]

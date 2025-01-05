@@ -15,8 +15,8 @@ import { QuizzesService } from './quizzes.service';
 import { WebResponse } from 'src/model/web.model';
 import { CreateQuiz, Quiz, UpdateQuiz } from 'src/model/quiz.model';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { TokenPayload } from 'src/model/auth.model';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('quizzes')
 export class QuizzesController {
@@ -55,10 +55,10 @@ export class QuizzesController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async createQuiz(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() quiz: CreateQuiz,
   ): Promise<WebResponse<Quiz>> {
-    const newQuiz = await this.quizzesService.create(user.user_uuid, quiz);
+    const newQuiz = await this.quizzesService.create(user.uuid, quiz);
 
     return {
       message: 'Create Quiz Succeed',

@@ -15,8 +15,8 @@ import { SectionsService } from './sections.service';
 import { WebResponse } from 'src/model/web.model';
 import { CreateSection, Section } from 'src/model/section.model';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { TokenPayload } from 'src/model/auth.model';
-import { CurrentUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { UserResponse } from 'src/model/user.model';
 
 @Controller('sections')
 export class SectionsController {
@@ -54,13 +54,10 @@ export class SectionsController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   async createSection(
-    @CurrentUser() user: TokenPayload,
+    @CurrentUser() user: UserResponse,
     @Body() section: CreateSection,
   ): Promise<WebResponse<Section>> {
-    const newSection = await this.sectionsService.create(
-      user.user_uuid,
-      section,
-    );
+    const newSection = await this.sectionsService.create(user.uuid, section);
 
     return {
       message: 'Section created',

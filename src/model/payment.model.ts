@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from './subscription.model';
+import { SubscriptionPlan } from './subscription-plan';
 
 export class CreatePaymentRequest {
   first_name: string;
