@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { QuizzesService } from './quizzes.service';
@@ -21,21 +20,6 @@ import { UserResponse } from 'src/model/user.model';
 @Controller('quizzes')
 export class QuizzesController {
   constructor(private readonly quizzesService: QuizzesService) {}
-
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  async getQuizzes(
-    @Query('section_slug') sectionSlug: string,
-  ): Promise<WebResponse<Quiz[]>> {
-    const quizzes = await this.quizzesService.findAll(sectionSlug);
-
-    return {
-      message: 'Get Quizzes Succeed',
-      success: true,
-      status_code: HttpStatus.OK,
-      data: quizzes,
-    };
-  }
 
   @Get('/:slug')
   @HttpCode(HttpStatus.OK)
