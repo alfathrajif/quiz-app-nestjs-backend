@@ -5,15 +5,15 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { WebResponse } from 'src/model/web.model';
 import { ProfileResponse, UserResponse } from 'src/model/user.model';
+import { UsersUserService } from './users-user.service';
 
 @Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UsersUserController {
+  constructor(private readonly usersUserService: UsersUserService) {}
 
   @Get('/profile')
   @HttpCode(HttpStatus.OK)
@@ -21,7 +21,7 @@ export class UsersController {
   async getProfile(
     @CurrentUser() user: UserResponse,
   ): Promise<WebResponse<ProfileResponse>> {
-    const currentUser = await this.usersService.getUser({
+    const currentUser = await this.usersUserService.getUser({
       uuid: user.uuid,
     });
 

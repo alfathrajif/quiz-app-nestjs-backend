@@ -10,7 +10,7 @@ import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscr
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 
 @Injectable()
-export class UsersService {
+export class UsersUserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,

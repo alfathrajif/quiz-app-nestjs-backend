@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersUserService } from 'src/users/user/users-user.service';
 import * as bcrypt from 'bcrypt';
 import { User, UserResponse } from 'src/model/user.model';
 import ms from 'ms';
@@ -19,7 +19,7 @@ import { LogsService } from 'src/payments/logs/logs.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersUserService: UsersUserService,
     private readonly configService: ConfigService,
     private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,
     private readonly subscriptionsService: SubscriptionsService,
@@ -147,7 +147,7 @@ export class AuthService {
   private async createUser(user: SignupRequest, hashedPassword: string) {
     try {
       const name = `${user.first_name} ${user.last_name}`;
-      return await this.usersService.createUser({
+      return await this.usersUserService.createUser({
         name,
         email: user.email,
         password: hashedPassword,
@@ -191,7 +191,7 @@ export class AuthService {
     }
 
     try {
-      const user = await this.usersService.getUser({ email });
+      const user = await this.usersUserService.getUser({ email });
 
       if (!user) {
         console.warn(`User with email ${email} not found.`);
