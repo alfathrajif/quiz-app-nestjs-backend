@@ -20,7 +20,10 @@ export class UserResponse {
   uuid: string;
   email: string;
   name: string;
-  role: Role;
+  role?: Role;
+  phone: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export class ProfileResponse {
@@ -45,4 +48,32 @@ export class CreateUserResponse {
   uuid: string;
   name: string;
   email: string;
+}
+
+export class CreateUserType {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  role?: {
+    name: string;
+  };
+  phone: string;
+}
+
+export class CurrentUserType {
+  uuid: string;
+  email: string;
+  name: string;
+  role?: Role;
+}
+
+export class UserType {
+  uuid: string;
+  email: string;
+  name: string;
+  role?: Role;
+  phone: string;
+  created_at: Date;
+  updated_at: Date;
 }

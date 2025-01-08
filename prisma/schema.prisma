@@ -17,15 +17,18 @@ model Role {
 }
 
 model User {
-  uuid       String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  phone      String?
-  password   String
-  role_uuid  String
-  role       Role     @relation(fields: [role_uuid], references: [uuid])
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  uuid            String    @id @default(uuid())
+  name            String
+  email           String    @unique
+  phone           String?
+  password        String
+  role_uuid       String
+  role            Role      @relation(fields: [role_uuid], references: [uuid])
+  created_by      User?     @relation("CreatedBy", fields: [created_by_uuid], references: [uuid])
+  created_by_uuid String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @default(now())
+  deleted_at      DateTime?
 
   quizzes          Quiz[]
   quiz_attempts    QuizAttempt[]
@@ -35,6 +38,7 @@ model User {
   payment_logs     PaymentLog[]
   sections         Section[]
   tryouts          Tryout[]
+  created_users    User[]           @relation("CreatedBy")
 
   @@map("users")
 }

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
 import * as bcrypt from 'bcrypt';
+import { fakerID_ID as faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
@@ -23,7 +24,7 @@ async function generateRole() {
   };
 }
 
-async function generateUser(role: { uuid: string; name: string }) {
+async function generateSpesificUser(role: { uuid: string; name: string }) {
   const passwordHash = await bcrypt.hash('Password123', 10);
 
   if (role.name === 'admin') {
@@ -48,6 +49,29 @@ async function generateUser(role: { uuid: string; name: string }) {
       },
     });
     return customerUser;
+  }
+}
+
+async function generateRandomUsers(count: number) {
+  const { userRole } = await generateRole();
+
+  for (let i = 0; i < count; i++) {
+    const passwordHash = await bcrypt.hash('Password123', 10);
+
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const email = faker.internet.email({ firstName, lastName }).toLowerCase();
+    const phone = faker.phone.number();
+
+    await prisma.user.create({
+      data: {
+        name: `${firstName} ${lastName}`,
+        email: email,
+        password: passwordHash,
+        role_uuid: userRole.uuid,
+        phone: phone,
+      },
+    });
   }
 }
 
@@ -719,18 +743,16 @@ async function main() {
     prisma.user.deleteMany(),
     prisma.role.deleteMany(),
   ]);
-
   const { adminRole, userRole } = await generateRole();
-
-  await generateUser(adminRole);
-  await generateUser(userRole);
+  await generateSpesificUser(adminRole);
+  await generateSpesificUser(userRole);
+  await generateRandomUsers(50);
 
   const adminUser = await prisma.user.findUnique({
     where: {
       email: 'admin@example.com',
     },
   });
-
   await generateSubscriptionPlans();
   await generateTryout(adminUser.uuid);
 }

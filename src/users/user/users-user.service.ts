@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma.service';
 import {
-  CreateUserRequest,
-  CreateUserResponse,
+  CreateUserType,
+  CurrentUserType,
   User,
+  UserType,
 } from 'src/model/user.model';
 import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscription-plans-user.service';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
@@ -136,22 +137,50 @@ export class UsersUserService {
     }
   }
 
-  async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(
+    currentUser: CurrentUserType,
+    data: CreateUserType,
+  ): Promise<UserType> {
     const role = await this.prismaService.role.findFirst({
       where: {
-        name: data.role,
+        name: data.role.name,
       },
     });
 
+    const name = `${data.first_name} ${data.last_name}`;
+
+    if (!currentUser || currentUser.role.name !== 'admin') {
+      const user = await this.prismaService.user.create({
+        data: {
+          name: name,
+          email: data.email,
+          password: data.password,
+          phone: data.phone,
+          role: {
+            connect: {
+              uuid: role.uuid,
+            },
+          },
+        },
+      });
+
+      return user;
+    }
+
     const user = await this.prismaService.user.create({
       data: {
-        name: data.name,
+        name: name,
         email: data.email,
         password: data.password,
         phone: data.phone,
         role: {
           connect: {
             uuid: role.uuid,
+          },
+        },
+        created_by: {
+          connect: {
+            uuid: currentUser.uuid,
           },
         },
       },

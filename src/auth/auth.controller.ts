@@ -37,6 +37,9 @@ export class AuthController {
         name: result.name,
         email: result.email,
         role: result.role,
+        created_at: result.created_at,
+        phone: result.phone,
+        updated_at: result.updated_at,
       },
     };
   }

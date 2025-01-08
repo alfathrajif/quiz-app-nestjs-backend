@@ -16,6 +16,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TryoutsModule } from './tryouts/tryouts.module';
 import { UsersUserModule } from './users/user/users-user.module';
 import { UsersAdminModule } from './users/admin/users-admin.module';
+import { AdministratorsModule } from './administrators/administrators.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { UsersAdminModule } from './users/admin/users-admin.module';
     SectionsModule,
     SubscriptionPlansAdminModule,
     SubscriptionPlansUserModule,
+    AdministratorsModule,
   ],
   controllers: [],
   providers: [],

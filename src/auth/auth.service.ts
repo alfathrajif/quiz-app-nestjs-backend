@@ -14,7 +14,6 @@ import { Response } from 'express';
 import { SubscriptionPlansUserService } from 'src/subscription-plans/user/subscription-plans-user.service';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { Subscription } from 'src/model/subscription.model';
-import { LogsService } from 'src/payments/logs/logs.service';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +23,6 @@ export class AuthService {
     private readonly SubscriptionPlansUserService: SubscriptionPlansUserService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly jwtService: JwtService,
-    private readonly paymentLogsService: LogsService,
   ) {}
 
   async login(user: UserResponse, response: Response): Promise<UserResponse> {
@@ -79,6 +77,9 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
       };
     } catch (err) {
       console.log(err);
@@ -146,12 +147,14 @@ export class AuthService {
 
   private async createUser(user: SignupRequest, hashedPassword: string) {
     try {
-      const name = `${user.first_name} ${user.last_name}`;
-      return await this.usersUserService.createUser({
-        name,
+      return await this.usersUserService.createUser(null, {
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
         password: hashedPassword,
-        role: 'user',
+        role: {
+          name: 'user',
+        },
         phone: user.phone,
       });
     } catch {
